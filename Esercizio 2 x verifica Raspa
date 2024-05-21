@@ -1,0 +1,60 @@
+import java.util.Arrays;
+
+public class OrdinaPari {
+    
+    public static void main(String[] args) {
+        int[] array = {29, 14, 3, 20, 7, 18, 1, 10, 11}; // Un esempio di array disordinato
+        
+        // Chiamata al metodo per ordinare i numeri pari
+        ordinaPariInPosizione(array);
+        
+        // Stampa del risultato finale
+        System.out.println(Arrays.toString(array));
+    }
+    
+    public static void ordinaPariInPosizione(int[] array) {
+        // Step 1: Estrarre i numeri pari e salvarne le posizioni
+        int countPari = 0;
+        for (int num : array) {
+            if (num % 2 == 0) {
+                countPari++;
+            }
+        }
+        
+        int[] pari = new int[countPari];
+        int[] posizioni = new int[countPari];
+        int index = 0;
+        
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] % 2 == 0) {
+                pari[index] = array[i];
+                posizioni[index] = i;
+                index++;
+            }
+        }
+        
+        // Step 2: Ordinare i numeri pari usando il selection sort
+        selectionSort(pari);
+        
+        // Step 3: Reinserire i numeri pari ordinati nelle posizioni originali
+        for (int i = 0; i < pari.length; i++) {
+            array[posizioni[i]] = pari[i];
+        }
+    }
+    
+    // Metodo di ordinamento selection sort per un array di interi
+    public static void selectionSort(int[] array) {
+        for (int i = 0; i < array.length - 1; i++) {
+            int minIndex = i;
+            for (int j = i + 1; j < array.length; j++) {
+                if (array[j] < array[minIndex]) {
+                    minIndex = j;
+                }
+            }
+            // Scambio dei valori
+            int temp = array[minIndex];
+            array[minIndex] = array[i];
+            array[i] = temp;
+        }
+    }
+}
