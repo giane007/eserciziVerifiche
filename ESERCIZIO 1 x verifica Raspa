@@ -1,5 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 class Contatto {
@@ -18,7 +16,7 @@ class Contatto {
     }
 
     public String getNumeroDiTelefono() {
-        return nascosto ? null : numeroDiTelefono;
+        return nascosto ? "null" : numeroDiTelefono;
     }
 
     public boolean isNascosto() {
@@ -31,68 +29,85 @@ class Contatto {
 
     @Override
     public String toString() {
-        return "Nome: " + nome + ", Telefono: " + (nascosto ? "null" : numeroDiTelefono);
+        return "Nome: " + nome + ", Telefono: " + getNumeroDiTelefono();
     }
 }
 
 class Rubrica {
-    private List<Contatto> contatti;
-    private List<String> chiamateRecenti;
+    private Contatto[] contatti;
+    private String[] chiamateRecenti;
+    private int contattiCount;
+    private int chiamateCount;
     private String password;
 
     public Rubrica(String password) {
-        this.contatti = new ArrayList<>();
-        this.chiamateRecenti = new ArrayList<>();
+        this.contatti = new Contatto[100];
+        this.chiamateRecenti = new String[10];
+        this.contattiCount = 0;
+        this.chiamateCount = 0;
         this.password = password;
     }
 
     public void aggiungiContatto(Contatto contatto) {
-        contatti.add(contatto);
+        if (contattiCount < contatti.length) {
+            contatti[contattiCount++] = contatto;
+        } else {
+            System.out.println("Rubrica piena, impossibile aggiungere nuovi contatti.");
+        }
     }
 
     public void rimuoviContatto(String nome) {
-        contatti.removeIf(contatto -> contatto.getNome().equals(nome));
-    }
-
-    public void nascondiContatto(String nome, boolean nascondi) {
-        for (Contatto contatto : contatti) {
-            if (contatto.getNome().equals(nome)) {
-                contatto.setNascosto(nascondi);
+        for (int i = 0; i < contattiCount; i++) {
+            if (contatti[i].getNome().equals(nome)) {
+                contatti[i] = contatti[--contattiCount];
+                contatti[contattiCount] = null;
                 break;
             }
         }
     }
 
-    public List<Contatto> getContatti(boolean mostraNascosti, String password) {
-        if (mostraNascosti && this.password.equals(password)) {
-            return new ArrayList<>(contatti);
-        }
-        List<Contatto> contattiVisibili = new ArrayList<>();
-        for (Contatto contatto : contatti) {
-            if (!contatto.isNascosto()) {
-                contattiVisibili.add(contatto);
+    public void nascondiContatto(String nome, boolean nascondi) {
+        for (int i = 0; i < contattiCount; i++) {
+            if (contatti[i].getNome().equals(nome)) {
+                contatti[i].setNascosto(nascondi);
+                break;
             }
         }
-        return contattiVisibili;
+    }
+
+    public Contatto[] getContatti(boolean mostraNascosti, String password) {
+        if (mostraNascosti && this.password.equals(password)) {
+            return contatti.clone();
+        }
+        Contatto[] contattiVisibili = new Contatto[contattiCount];
+        int count = 0;
+        for (int i = 0; i < contattiCount; i++) {
+            if (!contatti[i].isNascosto()) {
+                contattiVisibili[count++] = contatti[i];
+            }
+        }
+        return java.util.Arrays.copyOf(contattiVisibili, count);
     }
 
     public void aggiungiChiamataRecente(String numeroDiTelefono) {
-        chiamateRecenti.add(numeroDiTelefono);
-        if (chiamateRecenti.size() > 10) {
-            chiamateRecenti.remove(0); // Mantieni solo le ultime 10 chiamate
+        if (chiamateCount < chiamateRecenti.length) {
+            chiamateRecenti[chiamateCount++] = numeroDiTelefono;
+        } else {
+            System.arraycopy(chiamateRecenti, 1, chiamateRecenti, 0, chiamateRecenti.length - 1);
+            chiamateRecenti[chiamateRecenti.length - 1] = numeroDiTelefono;
         }
     }
 
-    public List<String> getChiamateRecenti() {
-        return new ArrayList<>(chiamateRecenti);
+    public String[] getChiamateRecenti() {
+        return java.util.Arrays.copyOf(chiamateRecenti, chiamateCount);
     }
 }
 
 public class Main {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        Rubrica rubrica = new Rubrica("passwordSegreta");
+    private static final Scanner scanner = new Scanner(System.in);
+    private static final Rubrica rubrica = new Rubrica("passwordSegreta");
 
+    public static void main(String[] args) {
         while (true) {
             System.out.println("1. Aggiungi Contatto");
             System.out.println("2. Rimuovi Contatto");
@@ -101,55 +116,26 @@ public class Main {
             System.out.println("5. Aggiungi Chiamata Recente");
             System.out.println("6. Visualizza Chiamate Recenti");
             System.out.println("7. Esci");
-            int scelta = scanner.nextInt();
-            scanner.nextLine(); // Consuma la nuova linea
+            int scelta = Integer.parseInt(scanner.nextLine());
 
             switch (scelta) {
                 case 1:
-                    System.out.println("Inserisci nome:");
-                    String nome = scanner.nextLine();
-                    System.out.println("Inserisci numero di telefono:");
-                    String numeroDiTelefono = scanner.nextLine();
-                    System.out.println("Nascondere il contatto? (sì/no):");
-                    boolean nascosto = scanner.nextLine().equalsIgnoreCase("sì");
-                    rubrica.aggiungiContatto(new Contatto(nome, numeroDiTelefono, nascosto));
+                    aggiungiContatto();
                     break;
                 case 2:
-                    System.out.println("Inserisci nome da rimuovere:");
-                    nome = scanner.nextLine();
-                    rubrica.rimuoviContatto(nome);
+                    rimuoviContatto();
                     break;
                 case 3:
-                    System.out.println("Inserisci nome da nascondere/mostrare:");
-                    nome = scanner.nextLine();
-                    System.out.println("Nascondere il contatto? (sì/no):");
-                    nascosto = scanner.nextLine().equalsIgnoreCase("sì");
-                    rubrica.nascondiContatto(nome, nascosto);
+                    nascondiMostraContatto();
                     break;
                 case 4:
-                    System.out.println("Mostrare contatti nascosti? (sì/no):");
-                    boolean mostraNascosti = scanner.nextLine().equalsIgnoreCase("sì");
-                    if (mostraNascosti) {
-                        System.out.println("Inserisci password:");
-                        String password = scanner.nextLine();
-                        for (Contatto contatto : rubrica.getContatti(true, password)) {
-                            System.out.println(contatto);
-                        }
-                    } else {
-                        for (Contatto contatto : rubrica.getContatti(false, "")) {
-                            System.out.println(contatto);
-                        }
-                    }
+                    visualizzaContatti();
                     break;
                 case 5:
-                    System.out.println("Inserisci numero di telefono della chiamata recente:");
-                    numeroDiTelefono = scanner.nextLine();
-                    rubrica.aggiungiChiamataRecente(numeroDiTelefono);
+                    aggiungiChiamataRecente();
                     break;
                 case 6:
-                    for (String chiamata : rubrica.getChiamateRecenti()) {
-                        System.out.println("Chiamato: " + chiamata);
-                    }
+                    visualizzaChiamateRecenti();
                     break;
                 case 7:
                     System.exit(0);
@@ -159,6 +145,62 @@ public class Main {
             }
         }
     }
+
+    private static void aggiungiContatto() {
+        System.out.println("Inserisci nome:");
+        String nome = scanner.nextLine();
+        System.out.println("Inserisci numero di telefono:");
+        String numeroDiTelefono = scanner.nextLine();
+        System.out.println("Nascondere il contatto? (sì/no):");
+        boolean nascosto = scanner.nextLine().equalsIgnoreCase("sì");
+        rubrica.aggiungiContatto(new Contatto(nome, numeroDiTelefono, nascosto));
+    }
+
+    private static void rimuoviContatto() {
+        System.out.println("Inserisci nome da rimuovere:");
+        String nome = scanner.nextLine();
+        rubrica.rimuoviContatto(nome);
+    }
+
+    private static void nascondiMostraContatto() {
+        System.out.println("Inserisci nome da nascondere/mostrare:");
+        String nome = scanner.nextLine();
+        System.out.println("Nascondere il contatto? (sì/no):");
+        boolean nascosto = scanner.nextLine().equalsIgnoreCase("sì");
+        rubrica.nascondiContatto(nome, nascosto);
+    }
+
+    private static void visualizzaContatti() {
+        System.out.println("Mostrare contatti nascosti? (sì/no):");
+        boolean mostraNascosti = scanner.nextLine().equalsIgnoreCase("sì");
+        if (mostraNascosti) {
+            System.out.println("Inserisci password:");
+            String password = scanner.nextLine();
+            for (Contatto contatto : rubrica.getContatti(true, password)) {
+                if (contatto != null) {
+                    System.out.println(contatto);
+                }
+            }
+        } else {
+            for (Contatto contatto : rubrica.getContatti(false, "")) {
+                if (contatto != null) {
+                    System.out.println(contatto);
+                }
+            }
+        }
+    }
+
+    private static void aggiungiChiamataRecente() {
+        System.out.println("Inserisci numero di telefono della chiamata recente:");
+        String numeroDiTelefono = scanner.nextLine();
+        rubrica.aggiungiChiamataRecente(numeroDiTelefono);
+    }
+
+    private static void visualizzaChiamateRecenti() {
+        for (String chiamata : rubrica.getChiamateRecenti()) {
+            if (chiamata != null) {
+                System.out.println("Chiamato: " + chiamata);
+            }
+        }
+    }
 }
-
-
