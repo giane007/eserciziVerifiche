@@ -3,7 +3,7 @@ import java.util.Arrays;
 public class OrdinaPari {
     
     public static void main(String[] args) {
-        int[] array = {29, 14, 3, 20, 7, 18, 1, 10, 11}; // Un esempio di array disordinato
+        int[] array = {28, 14, 3, 20, 6, 18, 1, 10, 2}; // Un esempio di array disordinato
         
         // Chiamata al metodo per ordinare i numeri pari
         ordinaPariInPosizione(array);
