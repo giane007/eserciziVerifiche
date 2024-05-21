@@ -4,9 +4,20 @@ public class OrdinaPari {
     
    public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Inserisci la lunghezza dell'array: ");
-        int length = scanner.nextInt();
-        
+
+        boolean uscita;
+
+        do {
+            System.out.println("Inserisci la lunghezza del tuo array che vada da 8 a 10: ");
+            l = sc.nextInt();
+            if (l < 8 || l > 10) {
+                System.out.println("Lunghezza array errata.");
+                uscita = true;
+            } else {
+                uscita = false;
+            }
+        } while (uscita);
+
         int[] array = new int[length];
         System.out.println("Inserisci i numeri nell'array:");
         for (int i = 0; i < length; i++) {
