@@ -2,14 +2,25 @@ import java.util.Arrays;
 
 public class OrdinaPari {
     
-    public static void main(String[] args) {
-        int[] array = {28, 14, 3, 20, 6, 18, 1, 10, 2}; // Un esempio di array disordinato
+   public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Inserisci la lunghezza dell'array: ");
+        int length = scanner.nextInt();
+        
+        int[] array = new int[length];
+        System.out.println("Inserisci i numeri nell'array:");
+        for (int i = 0; i < length; i++) {
+            array[i] = scanner.nextInt();
+        }
         
         // Chiamata al metodo per ordinare i numeri pari
         ordinaPariInPosizione(array);
         
         // Stampa del risultato finale
+        System.out.println("Array dopo l'ordinamento dei numeri pari:");
         System.out.println(Arrays.toString(array));
+        
+        scanner.close(); // Chiudi lo scanner per evitare leak di risorse
     }
     
     public static void ordinaPariInPosizione(int[] array) {
